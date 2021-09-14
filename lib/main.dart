@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:quiz_tuiz/question.dart';
+import 'package:rflutter_alert/rflutter_alert.dart';
 
 void main() => runApp(Quizzler());
 
@@ -35,6 +36,13 @@ class _QuizPageState extends State<QuizPage> {
   ];
 
   int question = 0;
+  int correct = 0;
+
+  void reset() {
+    question = 0;
+    correct = 0;
+    scoreKeeper.clear();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -75,6 +83,7 @@ class _QuizPageState extends State<QuizPage> {
               onPressed: () {
                 setState(() {
                   if (questions[question].questionAnswer) {
+                    correct++;
                     scoreKeeper.add(
                       Icon(
                         Icons.check,
@@ -89,7 +98,11 @@ class _QuizPageState extends State<QuizPage> {
                       ),
                     );
                   }
-                  question = (question + 1) % 3;
+                  question = question + 1;
+                  if (question == questions.length) {
+                    alert(context, questions.length, correct);
+                    reset();
+                  }
                 });
               },
             ),
@@ -112,6 +125,7 @@ class _QuizPageState extends State<QuizPage> {
               onPressed: () {
                 setState(() {
                   if (!questions[question].questionAnswer) {
+                    correct++;
                     scoreKeeper.add(
                       Icon(
                         Icons.check,
@@ -126,7 +140,11 @@ class _QuizPageState extends State<QuizPage> {
                       ),
                     );
                   }
-                  question = (question + 1) % 3;
+                  question = question + 1;
+                  if (question == questions.length) {
+                    alert(context, questions.length, correct);
+                    reset();
+                  }
                 });
               },
             ),
@@ -145,3 +163,34 @@ question1: 'You can lead a cow down stairs but not up stairs.', false,
 question2: 'Approximately one quarter of human bones are in the feet.', true,
 question3: 'A slug\'s blood is green.', true,
 */
+
+void alert(context, totalQuestion, correct) {
+  String title = "";
+  String desc = "";
+  AlertType type = AlertType.success;
+  title = '$correct/$totalQuestion';
+  if (correct > totalQuestion / 2) {
+    desc = "Good Job";
+  } else {
+    desc = "Upps. Need to do some practice";
+    type = AlertType.error;
+  }
+
+  Alert(
+    context: context,
+    type: type,
+    title: title,
+    desc: desc,
+    buttons: [
+      DialogButton(
+        child: Text(
+          "Close",
+          style: TextStyle(color: Colors.white, fontSize: 20),
+        ),
+        onPressed: () => Navigator.pop(context),
+        width: 120,
+        color: Colors.red,
+      )
+    ],
+  ).show();
+}
